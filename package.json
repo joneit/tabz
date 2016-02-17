@@ -1,0 +1,32 @@
+{
+  "name": "tabz",
+  "version": "1.0",
+  "main": "./index.js",
+  "description": "Easy hierarchial HTML folder tabs.",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/joneit/tabz.git"
+  },
+  "author": "JEiten",
+  "license": "MIT",
+  "dependencies": {
+    "css-injector": "^1.1.0"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.11.1",
+    "clean-css": "^3.4.9",
+    "gulp": "^3.9.1",
+    "gulp-browserify": "^0.5.1",
+    "gulp-eslint": "^2.0.0",
+    "gulp-inject": "^3.0.0",
+    "gulp-load-plugins": "^1.2.0",
+    "gulp-mocha": "^2.2.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-replace": "^0.5.4",
+    "gulp-uglify": "^1.5.2",
+    "gulp-util": "^3.0.7",
+    "js-string-escape": "^1.0.0",
+    "run-sequence": "^1.1.5",
+    "should": "^8.2.2"
+  }
+}
