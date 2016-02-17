@@ -30,19 +30,12 @@ var document = global.document = new Element();
 document.head = new Element();
 document.createElement = document.createTextNode = function() { return new Element(); };
 
-var tabz = require('../src/tabz.js');
+var Tabz = require('../src/tabz.js');
 
 function nullfunc() {}
 
 describe('require() returns an object that', function() {
-    describe('has a method `init` that', function() {
-        it('is a function', function() {
-            tabz.init.should.be.a.Function();
-        });
-    });
-    describe('has a method `tabTo` that', function() {
-        it('is a function', function() {
-            tabz.tabTo.should.be.a.Function();
-        });
+    it('is a function', function() {
+        Tabz.should.be.a.Function();
     });
 });

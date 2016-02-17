@@ -1,4 +1,4 @@
-div.tabz > header {
+div.tabz> header {
     position:relative;
     display:inline-block;
     background-color:white;
@@ -22,7 +22,7 @@ div.tabz > header + section {
     border:1px solid #666;
     border-radius: 6px;
     width: 85%;
-    height:85%;
+    height: 85%;
     z-index: 0;
 }
 

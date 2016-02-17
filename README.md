@@ -10,8 +10,8 @@ A 2-tab tab bar with the first tab enabled:
 ```html
 <div class="tabz">
 
-    <header class="tabz-enable">Tab A</header>
-    <section class="tabz-enable">Content A</section>
+    <header>Tab A</header>
+    <section>Content A</section>
 
     <header id="click-me">Tab B</header>
     <section>Content B</section>
@@ -21,15 +21,16 @@ A 2-tab tab bar with the first tab enabled:
 Make this call once after page loaded:
 
 ```javascript
-tabz();
+var Tabz = require('tabz');
+var tabz = new Tabz();
 ```
 
 ##### Switch to a tab programmatically
 
-To trigger a tab, you can call `tabz()` with the tab's `<header>` elemment:
+To trigger a tab, you can call `tabz()` with the tab's `<header>` elemment or a selector that resolves to it:
 
 ```javascript
-tabz(document.getElementById('click-me'));
+tabz.tabTo('#click-me');
 ```
 
 ##### Hierarchical
@@ -42,7 +43,7 @@ A 2-tab tab bar nested within the 2nd tab of another 2-tab tab bar.
     <header>Tab A</header>
     <section>Content A</section>
 
-    <header class="tabz-enable">Tab B</header>
+    <header>Tab B</header>
     <section class="tabz-enable">
         Content B
         <div class="tabz">
@@ -58,15 +59,23 @@ A 2-tab tab bar nested within the 2nd tab of another 2-tab tab bar.
 </div>
 ```
 
-### Options
+### Hints
+
+Use the `div.tabz > header + section` selector to adjust the `width` and `height` of your sections.
+
+Set `visibility:hidden` in the `style` attribute of your root tab bar so it won't be visible before the stylesheet loads.
+
+### Iitialization options
 
 ```javascript
-tabz( container, register )
+tabz( container, register, referenceElement )
 ```
 
-`container` - optional - defaults to `document` - Where to look for `div.tabz` elements. Alternatively, this can be a `<header>` element to simulate a click on.
+`container` - optional - Where to look for `div.tabz` elements. Alternatively, this can be a `<header>` element to simulate a click on. Defaults to `document`.
 
-`register` - optional - defaults to `true` - Whether to register or deregister.
+`register` - optional - Whether to register or deregister. Defaults to `true`.
+
+`referenceElement` - optional - Explicitly position `<style>` element before this element. Default position is at end of `<head>`.
 
 ### Demo
 

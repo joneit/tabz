@@ -5,8 +5,9 @@
         <title>tabz test harness</title>
         <script src="tabz.js"></script>
         <script>
+            var tabz;
             window.onload = function() {
-                tabz.init();
+                tabz = new Tabz();
             };
         </script>
         <style>
@@ -31,7 +32,7 @@
     </head>
 
     <body>
-        <div class="tabz">
+        <div class="tabz" style="visibility:hidden">
             <header class="tabz-enable">
                 Tab 1<br><small>2 lines</small>
             </header>

@@ -5,13 +5,13 @@ var gulp        = require('gulp'),
 
 var runSequence = require('run-sequence'),
     browserSync = require('browser-sync').create(),
-    exec        = require('child_process').exec,
     path        = require('path'),
     escapeStr   = require('js-string-escape'),
-    CleanCss    = require("clean-css");
+    CleanCss    = require("clean-css"),
+    pipe        = require('multipipe');
 
 var name     = 'tabz',
-    global   = name,
+    global   = 'Tabz',
     srcDir   = './src/',
     testDir  = './test/',
     buildDir = './build/';
@@ -20,11 +20,8 @@ var name     = 'tabz',
 
 gulp.task('lint', lint);
 gulp.task('test', test);
-gulp.task('browserify', function(callback) {
-    browserify();
-    browserifyMin();
-    callback();
-});
+gulp.task('browserify', browserify);
+gulp.task('reloadBrowsers', reloadBrowsers);
 gulp.task('serve', browserSyncLaunchServer);
 
 gulp.task('build', function(callback) {
@@ -34,17 +31,13 @@ gulp.task('build', function(callback) {
         'test',
         'inject-css',
         'browserify',
-        callback);
+        'reloadBrowsers',
+        callback
+    );
 });
 
 gulp.task('watch', function () {
-    gulp.watch([
-        buildDir + '**',
-        testDir + '**'
-    ], ['build'])
-        .on('change', function(event) {
-            browserSync.reload();
-        });
+    gulp.watch([srcDir + '**', testDir + '**'], ['build']);
 });
 
 gulp.task('default', ['build', 'watch'], browserSyncLaunchServer);
@@ -54,7 +47,7 @@ gulp.task('inject-css', function () {
         source = gulp.src(srcDir + name + '.css'),
         destination = gulp.dest(srcDir);
 
-    target
+    return target
         .pipe($$.inject(source, {
             transform: cssToJsFn,
             starttag: '/* {{name}}:{{ext}} */',
@@ -97,22 +90,21 @@ function browserify() {
             'module.exports =',
             'window.' + global + ' ='
         ))
-        .pipe($$.browserify({  debug: true }))
-        .on('error', $$.util.log)
-        .pipe($$.rename(name + '.js'))
-        .pipe(gulp.dest(buildDir));
-}
-
-function browserifyMin() {
-    return gulp.src(srcDir + 'index.js')
-        .pipe($$.replace(
-            'module.exports =',
-            'window.' + global + ' ='
-        ))
-        .pipe($$.browserify())
-        .pipe($$.uglify())
-        .on('error', $$.util.log)
-        .pipe($$.rename(name + '.min.js'))
+        .pipe(
+            $$.mirror(
+                pipe(
+                    $$.rename(name + '.js'),
+                    $$.browserify({ debug: true })
+                        .on('error', $$.util.log)
+                ),
+                pipe(
+                    $$.rename(name + '.min.js'),
+                    $$.browserify(),
+                    $$.uglify()
+                        .on('error', $$.util.log)
+                )
+            )
+        )
         .pipe(gulp.dest(buildDir));
 }
 
@@ -125,6 +117,10 @@ function browserSyncLaunchServer() {
         },
         port: 5009
     });
+}
+
+function reloadBrowsers() {
+    browserSync.reload();
 }
 
 function clearBashScreen() {

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cd build
+cd src
 
 rm npm-debug.log
 
