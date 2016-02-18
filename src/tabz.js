@@ -30,7 +30,7 @@ function Tabz(root, register, referenceElement) {
             var headStuff = document.querySelector('head').children;
             for (i = 0; !referenceElement && i < headStuff.length; ++i) {
                 el = headStuff[i];
-                if (el.tagName === 'STYLE' || el.tagName === 'LINK' && el.type === 'stylesheet') {
+                if (el.tagName === 'STYLE' || el.tagName === 'LINK' && el.rel === 'stylesheet') {
                     referenceElement = el;
                 }
             }
