@@ -15,6 +15,8 @@ var cssInjector = require('css-injector');
  * @constructor
  */
 function Tabz(root, register, referenceElement) {
+    var i, el;
+
     root = root || document;
     register = register === undefined || register;
 
@@ -22,7 +24,18 @@ function Tabz(root, register, referenceElement) {
         var css;
         /* inject:css */
         /* endinject */
-        cssInjector(css, 'tabz-css-base', referenceElement || document.querySelector('head style'));
+
+        if (!referenceElement) {
+            // find first <link> or <style> in <head>
+            var headStuff = document.querySelector('head').children;
+            for (i = 0; !referenceElement && i < headStuff.length; ++i) {
+                el = headStuff[i];
+                if (el.tagName === 'STYLE' || el.tagName === 'LINK' && el.type === 'stylesheet') {
+                    referenceElement = el;
+                }
+            }
+        }
+        cssInjector(css, 'tabz-css-base', referenceElement);
 
         this.root = root;
 
@@ -38,8 +51,8 @@ function Tabz(root, register, referenceElement) {
 
     var method = register ? 'addEventListener' : 'removeEventListener';
     var collection = root.querySelectorAll('.tabz');
-    for (var i = 0; i < collection.length; ++i) {
-        var el = collection[i];
+    for (i = 0; i < collection.length; ++i) {
+        el = collection[i];
         el.style.visibility = 'visible';
         el[method]('click', onclick);
     }

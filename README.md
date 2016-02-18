@@ -105,7 +105,7 @@ Where to look for `.tabz` elements. Defaults to `document`.
 Whether to register or deregister. Defaults to `true`.
 
 `referenceElement` - optional
-Explicitly position `<style>` element before this element. Default position is before the first `<style>` element in the `<head>` or at the end of `<head>` if it has no `<style>` elements..
+Explicitly position `<style>` element before this element. Default position is in `<head>`, before the first `<link>` or `<style>` element, if any; otherwise at the end of `<head>`.
 
 ### CDN versions
 
