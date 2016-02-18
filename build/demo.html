@@ -15,9 +15,6 @@
                 font-weight: bold;
                 margin: 0 3px;
             }
-            p {
-                width: 25em;
-            }
             header#default-tab + section {
                 font-size: 10pt;
             }
@@ -28,11 +25,24 @@
             i {
                 white-space: nowrap;
             }
+            .tabz {
+                visibility:hidden;
+            }
+            .tabz > header + section {
+                width: 300px;
+                height: 350px;
+            }
+            .tabz > header + section >
+            .tabz > header + section {
+                width: 280px;
+                height: 295px;
+            }
+
         </style>
     </head>
 
     <body>
-        <div class="tabz" style="visibility:hidden">
+        <div class="tabz" style="">
             <header class="tabz-enable">
                 Tab 1<br><small>2 lines</small>
             </header>
@@ -68,7 +78,7 @@
                     </header>
 
                     <section class="tabz-bg6">
-                        <p>This is the default tab because the <code>&lt;header&gt;</code> tag has an id of <i>default-tab</i>.</p>
+                        <p style="margin-top:0">This is the default tab because the <code>&lt;header&gt;</code> tag has an id of <i>default-tab</i>.</p>
                         <p>Notice how the algorithm walked up the hierarchy selecting each containing tab as well.</p>
                         <p>Another way to make a tab the default is to include <i>tabz-enable</i> in the <code>class</code> attribute of both the <code>&lt;header&gt;</code> and it's <code>&lt;section&gt;</code> tags.</p>
                         <p>You can also simulate a click on a tag by calling <code>tagz.init(element)</code> or <code>tagz.init(selector)</code> which is what this button does:</p>

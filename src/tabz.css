@@ -1,12 +1,15 @@
-div.tabz> header {
-    position:relative;
-    display:inline-block;
-    background-color:white;
+.tabz {
+    position: relative;
+}
+.tabz> header {
+    position: relative;
+    display: inline-block;
+    background-color: white;
     margin-left: 1em;
-    padding:5px .6em;
-    border-top:1px solid #666;
-    border-left:1px solid #666;
-    border-right:1px solid #666;
+    padding: 5px .6em;
+    border-top: 1px solid #666;
+    border-left: 1px solid #666;
+    border-right: 1px solid #666;
     border-radius: 6px 6px 0 0;
     cursor: default;
     user-select: none;
@@ -14,12 +17,12 @@ div.tabz> header {
     -moz-user-select: none;
     -ms-user-select: none;
 }
-div.tabz > header + section {
-    position:absolute;
-    background-color:white;
+.tabz > header + section {
+    position: absolute;
+    background-color: white;
     margin-top: -1.5px;
-    padding:.5em;
-    border:1px solid #666;
+    padding: 8px;
+    border: 1px solid #666;
     border-radius: 6px;
     width: 85%;
     height: 85%;
@@ -28,30 +31,30 @@ div.tabz > header + section {
 
 /* pop tab and folder to front */
 
-div.tabz > header + section.tabz-enable {
+.tabz > header + section.tabz-enable {
     z-index: 1;
 }
-div.tabz > header.tabz-enable {
+.tabz > header.tabz-enable {
     z-index: 2;
 }
 
 /* some handy background colors */
 
 .tabz-bg1 {
-    background-color:#f4f4ff !important;
+    background-color: #f4f4ff !important;
 }
 .tabz-bg2 {
-    background-color:#f4fff4 !important;
+    background-color: #f4fff4 !important;
 }
 .tabz-bg3 {
-    background-color:#f4ffff !important;
+    background-color: #f4ffff !important;
 }
 .tabz-bg4 {
-    background-color:#fff4f4 !important;
+    background-color: #fff4f4 !important;
 }
 .tabz-bg5 {
-    background-color:#fff4ff !important;
+    background-color: #fff4ff !important;
 }
 .tabz-bg6 {
-    background-color:#fffff4 !important;
+    background-color: #fffff4 !important;
 }

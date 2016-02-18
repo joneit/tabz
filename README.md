@@ -71,9 +71,26 @@ The default color for a tab is white. The stylesheet includes six pastel colors 
 
 ### Hints
 
-You will probably need to adjust the dimensions of your sections. You might use the `div.tabz > header + section` selector and adjust the `width` and `height` properties.
-
 Set `visibility:hidden` in the `style` attribute of your root tab bar div so it won't be visible before the stylesheet loads.
+
+You will probably need to adjust the dimensions of your sections. Adjust the `width` and `height` properties using the `.tabz > header + section` selector. Nested tabs will need their own dimensions.
+
+For example, you can find the following on the [demo page](https://github.com/joneit/tabz/blob/master/build/demo.html).
+
+```css
+.tabz {
+    visibility:hidden;
+}
+.tabz > header + section {
+    width: 300px;
+    height: 350px;
+}
+.tabz > header + section >
+.tabz > header + section {
+    width: 280px;
+    height: 295px;
+}
+```
 
 ### Initialization options
 
@@ -82,13 +99,13 @@ var tabz = new Tabz( container, register, referenceElement )
 ```
 
 `container` - optional
-Where to look for `div.tabz` elements. Alternatively, this can be a `<header>` element to simulate a click on. Defaults to `document`.
+Where to look for `.tabz` elements. Defaults to `document`.
 
 `register` - optional
 Whether to register or deregister. Defaults to `true`.
 
 `referenceElement` - optional
-Explicitly position `<style>` element before this element. Default position is at end of `<head>`. This is useful when you want to place another stylesheet after tabz's because you want to modify some of the baked-in styles.
+Explicitly position `<style>` element before this element. Default position is before the first `<style>` element in the `<head>` or at the end of `<head>` if it has no `<style>` elements..
 
 ### CDN versions
 

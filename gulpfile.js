@@ -37,7 +37,11 @@ gulp.task('build', function(callback) {
 });
 
 gulp.task('watch', function () {
-    gulp.watch([srcDir + '**', testDir + '**'], ['build']);
+    gulp.watch([
+        buildDir + 'demo.html',
+        srcDir + '**',
+        testDir + '**'
+    ], ['build']);
 });
 
 gulp.task('default', ['build', 'watch'], browserSyncLaunchServer);
