@@ -107,6 +107,23 @@ Whether to register or deregister. Defaults to `true`.
 `referenceElement` - optional
 Explicitly position `<style>` element before this element. Default position is in `<head>`, before the first `<link rel="stylesheet">` or `<style>` element, if any; otherwise at the end of `<head>`.
 
+### Events
+
+Not events really, but callbacks:
+
+* `tabz.tabEnabled(tabEvent)` - Called when a previously disabled tab is enabled. 
+
+* `tabz.tabDisabled(tabEvent)` - Called when a previously enabled tab is disabled by another tab being enabled.
+
+Both of the above are called with a `tabEvent` which is:
+
+```javascript
+{
+    target: tab, // the <header> HTMLElement of the tab in question
+    id: id // the string id of the tab (form the id attribute of the above HTMLElement)
+}
+```
+
 ### CDN versions
 
 To use in a browser, you have two options:

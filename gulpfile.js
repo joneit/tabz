@@ -119,7 +119,7 @@ function browserSyncLaunchServer() {
             baseDir: buildDir,
             index: "demo.html"
         },
-        port: 5009
+        port: 5014
     });
 }
 

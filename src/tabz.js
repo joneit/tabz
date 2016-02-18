@@ -50,20 +50,19 @@ function Tabz(root, register, referenceElement) {
     }
 
     var method = register ? 'addEventListener' : 'removeEventListener';
-    var collection = root.querySelectorAll('.tabz');
-    for (i = 0; i < collection.length; ++i) {
-        el = collection[i];
-        el.style.visibility = 'visible';
-        el[method]('click', onclick);
-    }
+    var boundClickHandler = onclick.bind(this);
+    toArray(root.querySelectorAll('.tabz')).forEach(function(tabBar) {
+        tabBar.style.visibility = 'visible';
+        tabBar[method]('click', boundClickHandler);
+    });
 }
 
-Tabz.prototype.tabTo = function (tabElt) {
+Tabz.prototype.tabTo = function(tabElt) {
     if (!(tabElt instanceof Element)) {
         tabElt = this.root.querySelector(tabElt);
     }
     while (tabElt && tabElt.tagName === 'HEADER') {
-        click(tabElt.parentElement, tabElt);
+        click.call(this, tabElt.parentElement, tabElt);
 
         // loop to click on containing tabs...
         tabElt = tabElt.parentElement.parentElement;
@@ -73,23 +72,85 @@ Tabz.prototype.tabTo = function (tabElt) {
     }
 };
 
-function click(div, tab) {
-    var result, i, el, clickInTab, enable,
-        collection = div.querySelectorAll(':scope>header,:scope>header+section');
+/**
+ * @typedef tabEvent
+ * @type {function}
+ * @param {Element} event.target - tab (`<header>` element)
+ * @param {string} event.id - id of tab (`<header>` element's `id` attribute)
+ */
 
-    for (i = 0; i < collection.length; ++i) {
-        el = collection[i];
-        clickInTab = el.contains(tab);
-        enable = clickInTab || el.previousElementSibling && el.previousElementSibling.contains(tab);
-        el.classList.toggle('tabz-enable', enable);
-        result = result || clickInTab;
-    }
+/**
+ * Called when a previously disabled tab is enabled.
+ * @type {tabEvent}
+ */
+Tabz.prototype.tabEnabled = noop;
 
-    return result;
+/**
+ * Called when a previously enabled tab is disabled by another tab being enabled.
+ * @type {tabEvent}
+ */
+Tabz.prototype.tabDisabled = noop;
+
+function noop() {} // null pattern
+
+function toArray(arr, start) {
+    return Array.prototype.slice.call(arr, start);
 }
 
+/** Enables the tab/folder pair of the clicked tab.
+ * Disables all the other pairs in this scope which will include the previously enabled pair.
+ * @private
+ * @this Tabz
+ * @param {Element} div - The element that's handling the click event.
+ * @param {Element} target - The element that received the click.
+ * @param {boolean} [options.silent] - Don't fire events.
+ * @returns {undefined|Element} The `<header>` element (tab) the was clicked; or `undefined` when click was not within a tab.
+ */
+function click(div, target, options) {
+    var newTab, oldTab,
+        disabledTabs = toArray(div.querySelectorAll(':scope>header:not(.tabz-enable)'));
+
+    disabledTabs.forEach(function(tab) { // todo: use a .find() polyfill here
+        if (tab.contains(target)) {
+            newTab = tab;
+        }
+    });
+
+    if (newTab) {
+        oldTab = div.querySelector(':scope>header.tabz-enable');
+        toggleTab.call(this, oldTab, false, options);
+        toggleTab.call(this, newTab, true, options);
+    }
+
+    return newTab;
+}
+
+/**
+ * @this Tabz
+ * @private
+ * @param {Element} tab - The `<header>` element of the tab to enable or disable.
+ * @param {boolean} enable - Enable (vs. disable) the tab.
+ * @param {boolean} [options.silent] - Don't fire events.
+ */
+function toggleTab(tab, enable, options) {
+    if (tab) {
+        var silent = options && options.silent;
+        var method = enable ? 'tabEnabled' : 'tabDisabled';
+        if (!silent) {
+            this[method]({target: tab, id: tab.id});
+        }
+        tab.classList.toggle('tabz-enable', enable);
+        tab.nextElementSibling.classList.toggle('tabz-enable', enable);
+    }
+}
+
+/**
+ * @private
+ * @this Tabz
+ * @param evt
+ */
 function onclick(evt) {
-    if (click(this, evt.target)) {
+    if (click.call(this, evt.currentTarget, evt.target)) {
         evt.stopPropagation();
     }
 }
