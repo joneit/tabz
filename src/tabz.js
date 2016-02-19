@@ -39,14 +39,13 @@ function Tabz(root, register, referenceElement) {
 
         this.root = root;
 
-        var defaultTab = (
-            root.querySelector('.tabz > header#default-tab') ||
-            root.querySelector('.tabz > header')
-        );
+        // enable first tab on each tab bar
+        toArray(root.querySelectorAll('.tabz>header:first-of-type,.tabz>section:first-of-type')).forEach(function(el) {
+            el.classList.add('tabz-enable');
+        });
 
-        if (defaultTab) {
-            this.tabTo(defaultTab);
-        }
+        // enable default tab and all its parents
+        this.tabTo(root.querySelector('.tabz > header#default-tab'));
     }
 
     var method = register ? 'addEventListener' : 'removeEventListener';
@@ -58,16 +57,18 @@ function Tabz(root, register, referenceElement) {
 }
 
 Tabz.prototype.tabTo = function(tabElt) {
-    if (!(tabElt instanceof Element)) {
-        tabElt = this.root.querySelector(tabElt);
-    }
-    while (tabElt && tabElt.tagName === 'HEADER') {
-        click.call(this, tabElt.parentElement, tabElt);
+    if (tabElt) {
+        if (!(tabElt instanceof Element)) {
+            tabElt = this.root.querySelector(tabElt);
+        }
+        while (tabElt && tabElt.tagName === 'HEADER') {
+            click.call(this, tabElt.parentElement, tabElt);
 
-        // loop to click on containing tabs...
-        tabElt = tabElt.parentElement.parentElement;
-        if (tabElt.tagName === 'SECTION') {
-            tabElt = tabElt.previousElementSibling;
+            // loop to click on containing tabs...
+            tabElt = tabElt.parentElement.parentElement;
+            if (tabElt.tagName === 'SECTION') {
+                tabElt = tabElt.previousElementSibling;
+            }
         }
     }
 };
@@ -93,8 +94,8 @@ Tabz.prototype.tabDisabled = noop;
 
 function noop() {} // null pattern
 
-function toArray(arr, start) {
-    return Array.prototype.slice.call(arr, start);
+function toArray(arrayLikeObject, start) {
+    return Array.prototype.slice.call(arrayLikeObject, start);
 }
 
 /** Enables the tab/folder pair of the clicked tab.
@@ -150,9 +151,7 @@ function toggleTab(tab, enable, options) {
  * @param evt
  */
 function onclick(evt) {
-    if (click.call(this, evt.currentTarget, evt.target)) {
-        evt.stopPropagation();
-    }
+    click.call(this, evt.currentTarget, evt.target);
 }
 
 module.exports = Tabz;
