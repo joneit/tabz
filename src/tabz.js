@@ -56,18 +56,31 @@ function Tabz(root, register, referenceElement) {
     });
 }
 
+/**
+ * @summary Selects the given tab.
+ * @desc If it is a nested tab, also reveals all its ancestor tabs.
+ * @param {string|Element} [tabElt] - May be one of:
+ * * `Element`
+ *   * `<header>` - tab element
+ *   * `<section>` - folder element
+ * * `string` - CSS selector to one of the above
+ * * falsy - fails silently
+ * @memberOf Tabz.prototype
+ */
 Tabz.prototype.tabTo = function(tabElt) {
     if (tabElt) {
         if (!(tabElt instanceof Element)) {
             tabElt = this.root.querySelector(tabElt);
         }
-        while (tabElt && tabElt.tagName === 'HEADER') {
-            click.call(this, tabElt.parentElement, tabElt);
-
-            // loop to click on containing tabs...
-            tabElt = tabElt.parentElement.parentElement;
+        while (tabElt) {
             if (tabElt.tagName === 'SECTION') {
                 tabElt = tabElt.previousElementSibling;
+            }
+            if (tabElt.tagName === 'HEADER') {
+                click.call(this, tabElt.parentElement, tabElt);
+                tabElt = tabElt.parentElement.parentElement; // loop to click on each containing tab...
+            } else {
+                tabElt = null;
             }
         }
     }

@@ -39,21 +39,24 @@
 
 /* some handy background colors */
 
+.tabz-bg0 {
+    background-color: #eee !important; /* grey */
+}
 .tabz-bg1 {
-    background-color: #f4f4ff !important;
+    background-color: #eef !important; /* blue */
 }
 .tabz-bg2 {
-    background-color: #f4fff4 !important;
+    background-color: #efe !important; /* green */
 }
 .tabz-bg3 {
-    background-color: #f4ffff !important;
+    background-color: #eff !important; /* cyan */
 }
 .tabz-bg4 {
-    background-color: #fff4f4 !important;
+    background-color: #fee !important; /* red */
 }
 .tabz-bg5 {
-    background-color: #fff4ff !important;
+    background-color: #fef !important; /* magenta */
 }
 .tabz-bg6 {
-    background-color: #fffff4 !important;
+    background-color: #ffe !important; /* yellow */
 }
