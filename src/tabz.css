@@ -18,6 +18,7 @@
 }
 .tabz > header + section {
     position: absolute;
+    display: none;
     background-color: white;
     margin-top: -1px;
     padding: 8px;

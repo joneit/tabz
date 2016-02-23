@@ -46,6 +46,13 @@ function Tabz(root, register, referenceElement) {
 
         // enable default tab and all its parents
         this.tabTo(root.querySelector('.tabz > header#default-tab'));
+
+        // Bug in older versions of Chrome (like v40) which was an implied break at mark-up location of an absolute positioned block. The work-around is to hide those blocks until after first render; then show them. I don't know why this works but it does. Seems to be durable.
+        setTimeout(function() {
+            toArray(root.querySelectorAll('.tabz > section')).forEach(function(el) {
+                el.style.display = 'block';
+            });
+        }, 0);
     }
 
     var method = register ? 'addEventListener' : 'removeEventListener';

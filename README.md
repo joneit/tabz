@@ -124,6 +124,13 @@ Both of the above are called with a `tabEvent` which is:
 }
 ```
 
+### Acceptance Testing
+
+* Chromium 40.0.2214.91
+* Chrome 48.0.2564.109
+* Safari 9.0.3
+* Firefox 44.0.2
+
 ### CDN versions
 
 To use in a browser, you have two options:
