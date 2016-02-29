@@ -79,8 +79,8 @@ function onclick(evt) {
 /**
  * @summary Selects the given tab.
  * @desc If it is a nested tab, also reveals all its ancestor tabs.
- * @param {string|Element} [el] - May be one of:
- * * `Element`
+ * @param {string|HTMLElement} [el] - May be one of:
+ * * `HTMLElement`
  *   * `<header>` - tab element
  *   * `<section>` - folder element
  * * `string` - CSS selector to one of the above
@@ -88,17 +88,9 @@ function onclick(evt) {
  * @memberOf Tabz.prototype
  */
 Tabz.prototype.tabTo = function(el) {
-    if (el) {
-        if (!(el instanceof Element)) {
-            el = this.root.querySelector(el);
-        }
-        while (el) {
-            el = this.tab(el);
-            if (el) {
-                click.call(this, el.parentElement, el);
-                el = el.parentElement.parentElement; // loop to click on each containing tab...
-            }
-        }
+    while ((el = this.tab(el))) {
+        click.call(this, el.parentElement, el);
+        el = el.parentElement.parentElement; // loop to click on each containing tab...
     }
 };
 
@@ -114,12 +106,38 @@ Tabz.prototype.enabled = function(el) {
     return el && el.querySelector(':scope>header.tabz-enable');
 };
 
+/**
+ * Get tab element if given folder element; or find tab.
+ * @param {string|HTMLElement} [el] - May be one of:
+ * * `HTMLElement`
+ *   * `<header>` - tab element
+ *   * `<section>` - folder element
+ * * `string` - CSS selector to one of the above
+ * @returns {null|HTMLElement} tab (`<header>...</header>`) element or `null` if `el` is not found or not one of the above
+ * @memberOf Tabz.prototype
+ */
 Tabz.prototype.tab = function(el) {
-    return el.tagName === 'HEADER' ? el : el.tagName === 'SECTION' ? el.previousElementSibling : null;
+    if (!(el instanceof Element)) {
+        el = this.root.querySelector(el);
+    }
+    return !(el instanceof HTMLElement) ? null : el.tagName === 'HEADER' ? el : el.tagName === 'SECTION' ? el.previousElementSibling : null;
 };
 
+/**
+ * Get folder element if given tab element; or find folder.
+ * @param {string|HTMLElement} [el] - May be one of:
+ * * `HTMLElement`
+ *   * `<header>` - tab element
+ *   * `<section>` - folder element
+ * * `string` - CSS selector to one of the above
+ * @returns {null|HTMLElement} tab (`<header>...</header>`) element or `null` if `el` is not found or not one of the above
+ * @memberOf Tabz.prototype
+ */
 Tabz.prototype.folder = function(el) {
-    return el.tagName === 'SECTION' ? el : el.tagName === 'HEADER' ? el.nextElementSibling : null;
+    if (!(el instanceof Element)) {
+        el = this.root.querySelector(el);
+    }
+    return !(el instanceof HTMLElement) ? null : el.tagName === 'SECTION' ? el : el.tagName === 'HEADER' ? el.nextElementSibling : null;
 };
 
 /** Enables the tab/folder pair of the clicked tab.
