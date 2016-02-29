@@ -73,19 +73,20 @@ tabz.tabTo('#click-me');
 To find out which tab in a panel is the currently selected tab, call the following with the panel element (or any element within it):
 
 ```javascript
-var enabledTab = tabz.enabled(element); // returns the tab (`<header>`) element.
+var enabledTab = tabz.enabled(element); // returns the tab (`<header>`) element
 ```
 
 ###### Callbacks
 
 There are callbacks for each of the following events:
 
-* `tabz.onEnable = function(tab, folder) { ... }` - Called before a previously disabled tab is enabled.
-* `tabz.onDisable = function(tab, folder) { ... }` - Called before a previously enabled tab is disabled.
-* `tabz.onEnabled = function(tab, folder) { ... }` - Called after a previously disabled tab is enabled.
-* `tabz.onDisabled = function(tab, folder) { ... }` - Called after a previously enabled tab is disabled by another tab being enabled.
+```javascript
+`tabz.onDisable = function(tab, folder) { ... }` // called before a previously enabled tab is disabled
+`tabz.onEnable = function(tab, folder) { ... }` // called before a previously disabled tab is enabled
+`tabz.onDisabled = function(tab, folder) { ... }` // called after a previously enabled tab is disabled
+`tabz.onEnabled = function(tab, folder) { ... }` // called after a previously disabled tab is enabled
 
-These calling context for each of these is `tabz`.
+The calling context for each of these (the `.this` value) is `tabz`.
 
 ### CSS included
 

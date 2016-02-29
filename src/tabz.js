@@ -9,8 +9,8 @@ var cssInjector = require('css-injector');
 
 /**
  * Register/deregister click handler on all tab collections.
- * @param {Element} [options.root=document] - Where to look for `.tabz` elements containing tabs and folders.
- * @param {boolean} [options.unhook=false] - Remove event listener from `.tabz` elements.
+ * @param {Element} [options.root=document] - Where to look for tab panels (`.tabz` elements) containing tabs and folders.
+ * @param {boolean} [options.unhook=false] - Remove event listener from tab panels (`.tabz` elements).
  * @param {Element} [options.referenceElement] - Passed to cssInjector's insertBefore() call.
  * @param {string} [options.defaultTabSelector='.default-tab'] - .classname or #id of the tab to select by default
  * @constructor
@@ -43,12 +43,12 @@ function Tabz(options) {
 
         /**
          * @summary The context of this tab object.
-         * @desc The context may encompass any number of `.tabz` elements.
+         * @desc The context may encompass any number of tab panels (`.tabz` elements).
          * @type {HTMLDocumen|HTMLElement}
          */
         this.root = root;
 
-        // enable first tab on each tab panel
+        // enable first tab on each tab panel (`.tabz` element)
         forEachEl('.tabz>header:first-of-type,.tabz>section:first-of-type', function(el) {
             el.classList.add('tabz-enable');
         }, root);
@@ -108,7 +108,7 @@ Tabz.prototype.tabTo = function(tab) {
 
 /**
  * Current selected tab.
- * @param {HTMLElement|number} el - An element that is (or is within) the tab panel to look in.
+ * @param {HTMLElement|number} el - An element that is (or is within) the tab panel (`.tabz` element) to look in.
  * @returns {undefined|HTMLElement} Returns tab (`<header>`) element.  Returns `undefined` if `el` is neither of the above or an out of range index.
  */
 Tabz.prototype.enabled = function(el) {
@@ -118,11 +118,15 @@ Tabz.prototype.enabled = function(el) {
     return el && el.querySelector(':scope>header.tabz-enable');
 };
 
-/** Enables the tab/folder pair of the clicked tab.
+Tabz.prototype.folder = function(el) {
+    return el.tagName === 'HEADER' ? el.nextElementSibling : el;
+};
+
+    /** Enables the tab/folder pair of the clicked tab.
  * Disables all the other pairs in this scope which will include the previously enabled pair.
  * @private
  * @this Tabz
- * @param {Element} div - The element that's handling the click event.
+ * @param {Element} div - The tab panel (`.tabz` element) that's handling the click event.
  * @param {Element} target - The element that received the click.
  * @returns {undefined|Element} The `<header>` element (tab) the was clicked; or `undefined` when click was not within a tab.
  */
@@ -152,15 +156,16 @@ function click(div, target) {
  */
 function toggleTab(tab, enable) {
     if (tab) {
-        var method = enable ? 'onEnable' : 'onDisable';
+        var folder = this.folder(tab),
+            method = enable ? 'onEnable' : 'onDisable';
 
-        this[method].call(this, tab, tab.nextElementSibling);
+        this[method].call(this, tab, folder);
 
         tab.classList.toggle('tabz-enable', enable);
-        tab.nextElementSibling.classList.toggle('tabz-enable', enable);
+        folder.classList.toggle('tabz-enable', enable);
 
         method += 'd';
-        this[method].call(this, tab, tab.nextElementSibling);
+        this[method].call(this, tab, folder);
     }
 }
 
