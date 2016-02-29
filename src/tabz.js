@@ -79,7 +79,7 @@ function onclick(evt) {
 /**
  * @summary Selects the given tab.
  * @desc If it is a nested tab, also reveals all its ancestor tabs.
- * @param {string|Element} [tab] - May be one of:
+ * @param {string|Element} [el] - May be one of:
  * * `Element`
  *   * `<header>` - tab element
  *   * `<section>` - folder element
@@ -87,20 +87,16 @@ function onclick(evt) {
  * * falsy - fails silently
  * @memberOf Tabz.prototype
  */
-Tabz.prototype.tabTo = function(tab) {
-    if (tab) {
-        if (!(tab instanceof Element)) {
-            tab = this.root.querySelector(tab);
+Tabz.prototype.tabTo = function(el) {
+    if (el) {
+        if (!(el instanceof Element)) {
+            el = this.root.querySelector(el);
         }
-        while (tab) {
-            if (tab.tagName === 'SECTION') {
-                tab = tab.previousElementSibling;
-            }
-            if (tab.tagName === 'HEADER') {
-                click.call(this, tab.parentElement, tab);
-                tab = tab.parentElement.parentElement; // loop to click on each containing tab...
-            } else {
-                tab = null;
+        while (el) {
+            el = this.tab(el);
+            if (el) {
+                click.call(this, el.parentElement, el);
+                el = el.parentElement.parentElement; // loop to click on each containing tab...
             }
         }
     }
@@ -118,11 +114,15 @@ Tabz.prototype.enabled = function(el) {
     return el && el.querySelector(':scope>header.tabz-enable');
 };
 
-Tabz.prototype.folder = function(el) {
-    return el.tagName === 'HEADER' ? el.nextElementSibling : el;
+Tabz.prototype.tab = function(el) {
+    return el.tagName === 'HEADER' ? el : el.tagName === 'SECTION' ? el.previousElementSibling : null;
 };
 
-    /** Enables the tab/folder pair of the clicked tab.
+Tabz.prototype.folder = function(el) {
+    return el.tagName === 'SECTION' ? el : el.tagName === 'HEADER' ? el.nextElementSibling : null;
+};
+
+/** Enables the tab/folder pair of the clicked tab.
  * Disables all the other pairs in this scope which will include the previously enabled pair.
  * @private
  * @this Tabz
