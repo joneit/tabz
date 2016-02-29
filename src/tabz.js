@@ -9,18 +9,22 @@ var cssInjector = require('css-injector');
 
 /**
  * Register/deregister click handler on all tab collections.
- * @param {Element} [toot=document] - Where to look for `.tabz` elements containing tabs and folders..
- * @param {boolean} [register=true] - Add event listener to or remove from `.tabz` elements.
- * @param {Element} [referenceElement] - Passed to cssInjector's insertBefore() call.
+ * @param {Element} [options.root=document] - Where to look for `.tabz` elements containing tabs and folders.
+ * @param {boolean} [options.unhook=false] - Remove event listener from `.tabz` elements.
+ * @param {Element} [options.referenceElement] - Passed to cssInjector's insertBefore() call.
+ * @param {string} [options.defaultTabSelector='.default-tab'] - .classname or #id of the tab to select by default
  * @constructor
  */
-function Tabz(root, register, referenceElement) {
+function Tabz(options) {
     var i, el;
 
-    root = root || document;
-    register = register === undefined || register;
+    options = options || {};
+    var root = options.root || document,
+        unhook = options.unhook,
+        referenceElement = options.referenceElement,
+        defaultTabSelector = options.defaultTabSelector || '.default-tab';
 
-    if (register) {
+    if (!unhook) {
         var css;
         /* inject:css */
         /* endinject */
@@ -37,36 +41,45 @@ function Tabz(root, register, referenceElement) {
         }
         cssInjector(css, 'tabz-css-base', referenceElement);
 
+        /**
+         * @summary The context of this tab object.
+         * @desc The context may encompass any number of `.tabz` elements.
+         * @type {HTMLDocumen|HTMLElement}
+         */
         this.root = root;
 
-        // enable first tab on each tab bar
-        toArray(root.querySelectorAll('.tabz>header:first-of-type,.tabz>section:first-of-type')).forEach(function(el) {
+        // enable first tab on each tab panel
+        forEachEl('.tabz>header:first-of-type,.tabz>section:first-of-type', function(el) {
             el.classList.add('tabz-enable');
-        });
+        }, root);
 
-        // enable default tab and all its parents
-        this.tabTo(root.querySelector('.tabz > header#default-tab'));
+        // enable default tab and all its parents (must be a tab)
+        this.tabTo(root.querySelector('.tabz > header' + defaultTabSelector));
 
         // Bug in older versions of Chrome (like v40) which was an implied break at mark-up location of an absolute positioned block. The work-around is to hide those blocks until after first render; then show them. I don't know why this works but it does. Seems to be durable.
         setTimeout(function() {
-            toArray(root.querySelectorAll('.tabz > section')).forEach(function(el) {
+            forEachEl('.tabz > section', function(el) {
                 el.style.display = 'block';
-            });
+            }, root);
         }, 0);
     }
 
-    var method = register ? 'addEventListener' : 'removeEventListener';
+    var method = unhook ? 'removeEventListener' : 'addEventListener';
     var boundClickHandler = onclick.bind(this);
-    toArray(root.querySelectorAll('.tabz')).forEach(function(tabBar) {
+    forEachEl('.tabz', function(tabBar) {
         tabBar.style.visibility = 'visible';
         tabBar[method]('click', boundClickHandler);
-    });
+    }, root);
+}
+
+function onclick(evt) {
+    click.call(this, evt.currentTarget, evt.target);
 }
 
 /**
  * @summary Selects the given tab.
  * @desc If it is a nested tab, also reveals all its ancestor tabs.
- * @param {string|Element} [tabElt] - May be one of:
+ * @param {string|Element} [tab] - May be one of:
  * * `Element`
  *   * `<header>` - tab element
  *   * `<section>` - folder element
@@ -74,49 +87,36 @@ function Tabz(root, register, referenceElement) {
  * * falsy - fails silently
  * @memberOf Tabz.prototype
  */
-Tabz.prototype.tabTo = function(tabElt) {
-    if (tabElt) {
-        if (!(tabElt instanceof Element)) {
-            tabElt = this.root.querySelector(tabElt);
+Tabz.prototype.tabTo = function(tab) {
+    if (tab) {
+        if (!(tab instanceof Element)) {
+            tab = this.root.querySelector(tab);
         }
-        while (tabElt) {
-            if (tabElt.tagName === 'SECTION') {
-                tabElt = tabElt.previousElementSibling;
+        while (tab) {
+            if (tab.tagName === 'SECTION') {
+                tab = tab.previousElementSibling;
             }
-            if (tabElt.tagName === 'HEADER') {
-                click.call(this, tabElt.parentElement, tabElt);
-                tabElt = tabElt.parentElement.parentElement; // loop to click on each containing tab...
+            if (tab.tagName === 'HEADER') {
+                click.call(this, tab.parentElement, tab);
+                tab = tab.parentElement.parentElement; // loop to click on each containing tab...
             } else {
-                tabElt = null;
+                tab = null;
             }
         }
     }
 };
 
 /**
- * @typedef tabEvent
- * @type {function}
- * @param {Element} event.target - tab (`<header>` element)
- * @param {string} event.id - id of tab (`<header>` element's `id` attribute)
+ * Current selected tab.
+ * @param {HTMLElement|number} el - An element that is (or is within) the tab panel to look in.
+ * @returns {undefined|HTMLElement} Returns tab (`<header>`) element.  Returns `undefined` if `el` is neither of the above or an out of range index.
  */
-
-/**
- * Called when a previously disabled tab is enabled.
- * @type {tabEvent}
- */
-Tabz.prototype.tabEnabled = noop;
-
-/**
- * Called when a previously enabled tab is disabled by another tab being enabled.
- * @type {tabEvent}
- */
-Tabz.prototype.tabDisabled = noop;
-
-function noop() {} // null pattern
-
-function toArray(arrayLikeObject, start) {
-    return Array.prototype.slice.call(arrayLikeObject, start);
-}
+Tabz.prototype.enabled = function(el) {
+    while (el && !el.classList.contains('tabz')) {
+        el = el.parentElement;
+    }
+    return el && el.querySelector(':scope>header.tabz-enable');
+};
 
 /** Enables the tab/folder pair of the clicked tab.
  * Disables all the other pairs in this scope which will include the previously enabled pair.
@@ -124,54 +124,87 @@ function toArray(arrayLikeObject, start) {
  * @this Tabz
  * @param {Element} div - The element that's handling the click event.
  * @param {Element} target - The element that received the click.
- * @param {boolean} [options.silent] - Don't fire events.
  * @returns {undefined|Element} The `<header>` element (tab) the was clicked; or `undefined` when click was not within a tab.
  */
-function click(div, target, options) {
-    var newTab, oldTab,
-        disabledTabs = toArray(div.querySelectorAll(':scope>header:not(.tabz-enable)'));
+function click(div, target) {
+    var newTab, oldTab;
 
-    disabledTabs.forEach(function(tab) { // todo: use a .find() polyfill here
+    forEachEl(':scope>header:not(.tabz-enable)', function(tab) { // todo: use a .find() polyfill here
         if (tab.contains(target)) {
             newTab = tab;
         }
-    });
+    }, div);
 
     if (newTab) {
-        oldTab = div.querySelector(':scope>header.tabz-enable');
-        toggleTab.call(this, oldTab, false, options);
-        toggleTab.call(this, newTab, true, options);
+        oldTab = this.enabled(div);
+        toggleTab.call(this, oldTab, false);
+        toggleTab.call(this, newTab, true);
     }
 
     return newTab;
 }
 
 /**
- * @this Tabz
  * @private
+ * @this Tabz
  * @param {Element} tab - The `<header>` element of the tab to enable or disable.
  * @param {boolean} enable - Enable (vs. disable) the tab.
- * @param {boolean} [options.silent] - Don't fire events.
  */
-function toggleTab(tab, enable, options) {
+function toggleTab(tab, enable) {
     if (tab) {
-        var silent = options && options.silent;
-        var method = enable ? 'tabEnabled' : 'tabDisabled';
-        if (!silent) {
-            this[method]({target: tab, id: tab.id});
-        }
+        var method = enable ? 'onEnable' : 'onDisable';
+
+        this[method].call(this, tab, tab.nextElementSibling);
+
         tab.classList.toggle('tabz-enable', enable);
         tab.nextElementSibling.classList.toggle('tabz-enable', enable);
+
+        method += 'd';
+        this[method].call(this, tab, tab.nextElementSibling);
     }
 }
 
 /**
- * @private
- * @this Tabz
- * @param evt
+ * @typedef tabEvent
+ * @type {function}
+ * @param {tabEventObject}
  */
-function onclick(evt) {
-    click.call(this, evt.currentTarget, evt.target);
+
+/**
+ * @typedef tabEventObject
+ * @property {Tabz} tabz - The tab object issuing the callback.
+ * @property {Element} target - The tab (`<header>` element).
+ */
+
+/**
+ * Called before a previously disabled tab is enabled.
+ * @type {tabEvent}
+ */
+Tabz.prototype.onEnable = noop;
+
+/**
+ * Called before a previously enabled tab is disabled by another tab being enabled.
+ * @type {tabEvent}
+ */
+Tabz.prototype.onDisable = noop;
+
+/**
+ * Called after a previously disabled tab is enabled.
+ * @type {tabEvent}
+ */
+Tabz.prototype.onEnabled = noop;
+
+/**
+ * Called after a previously enabled tab is disabled by another tab being enabled.
+ * @type {tabEvent}
+ */
+Tabz.prototype.onDisabled = noop;
+
+function noop() {} // null pattern
+
+function forEachEl(selector, iteratee, context) {
+    return Array.prototype.forEach.call((context || document).querySelectorAll(selector), iteratee);
 }
+
 
 module.exports = Tabz;

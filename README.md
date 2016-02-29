@@ -9,7 +9,7 @@ A demo can be found [here](http://joneit.github.io/tabz/demo.html).
 
 ###### Flat
 
-A 2-tab tab bar with the first tab enabled:
+A 2-tab tab panel with the first tab enabled:
 
 ```html
 <div class="tabz">
@@ -22,24 +22,10 @@ A 2-tab tab bar with the first tab enabled:
 
 </div>
 ```
-Make this call once after page loaded:
-
-```javascript
-var Tabz = require('tabz');
-var tabz = new Tabz();
-```
-
-###### Switch to a tab programmatically
-
-To trigger a tab, you can call the `.tabTo()` method with the tab's `<header>` element or a selector that resolves to it:
-
-```javascript
-tabz.tabTo('#click-me');
-```
 
 ###### Hierarchical
 
-A 2-tab tab bar nested within the 2nd tab of another 2-tab tab bar.
+A 2-tab tab panel nested within the 2nd tab of another 2-tab tab panel.
 
 ```html
 <div class="tabz">
@@ -62,6 +48,44 @@ A 2-tab tab bar nested within the 2nd tab of another 2-tab tab bar.
     </section>
 </div>
 ```
+
+The following, called after page load, will instantiate an single object to service all the `.tabz` panels above.
+
+```javascript
+var Tabz = require('tabz');
+var tabz = new Tabz();
+```
+
+Alternatively, you could instantiate separate objects for specific panels or sets of panels.
+
+In any case, the first tab of each `.tabz` panel will be enabled by default. See option `defaultTabSelector` (below) to override this.
+
+###### Switch to a tab programmatically
+
+To trigger a tab, you can call the `.tabTo()` method with the tab's `<header>` element or a selector that resolves to it:
+
+```javascript
+tabz.tabTo('#click-me');
+```
+
+###### Query currently selected tab
+
+To find out which tab in a panel is the currently selected tab, call the following with the panel element (or any element within it):
+
+```javascript
+var enabledTab = tabz.enabled(element); // returns the tab (`<header>`) element.
+```
+
+###### Callbacks
+
+There are callbacks for each of the following events:
+
+* `tabz.onEnable = function(tab, folder) { ... }` - Called before a previously disabled tab is enabled.
+* `tabz.onDisable = function(tab, folder) { ... }` - Called before a previously enabled tab is disabled.
+* `tabz.onEnabled = function(tab, folder) { ... }` - Called after a previously disabled tab is enabled.
+* `tabz.onDisabled = function(tab, folder) { ... }` - Called after a previously enabled tab is disabled by another tab being enabled.
+
+These calling context for each of these is `tabz`.
 
 ### CSS included
 
@@ -95,17 +119,16 @@ For example, you can find the following on the [demo page](https://github.com/jo
 ### Initialization options
 
 ```javascript
-var tabz = new Tabz( container, register, referenceElement )
+var tabz = new Tabz( options )
 ```
 
-`container` - optional
-Where to look for `.tabz` elements. Defaults to `document`.
+`options.root` - Where to look for `.tabz` panels. Defaults to `document`.
 
-`register` - optional
-Whether to register or deregister. Defaults to `true`.
+`options.unhook` - Skip normal initialization and just remove event listener from `.tabz` elements. Defaults to `false`.
 
-`referenceElement` - optional
-Explicitly position `<style>` element before this element. Default position is in `<head>`, before the first `<link rel="stylesheet">` or `<style>` element, if any; otherwise at the end of `<head>`.
+`options.referenceElement` - Explicitly position `<style>` element before this element. Default position is in `<head>`, before the first `<link rel="stylesheet">` or `<style>` element, if any; otherwise at the end of `<head>`.
+
+`defaultTabSelector` - A .classname or #id of the tab(s) to select by default. This string is appended to `.tabz > header` to ensure only one of our tabs is selected. Defaults to `'.default-tab'`.
 
 ### Events
 
