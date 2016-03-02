@@ -68,13 +68,23 @@ To trigger a tab, you can call the `.tabTo()` method with the tab's `<header>` e
 tabz.tabTo('#click-me');
 ```
 
-###### Query currently selected tab
+###### Discover currently selected tab
 
 To find out which tab in a panel is the currently selected tab, call the following with the panel element (or any element within it):
 
 ```javascript
 var enabledTab = tabz.enabled(element); // returns the tab (`<header>`) element
 ```
+
+###### Easily find tab panels, tabs, and folders
+
+```javascript
+var nearestPanelElement = tabz.panel(element); // ref to element with class 'tabz' containing `element`
+var nearestTabElement = tabz.tab(element); // ref to <header> containing `element`
+var nearestFolderElement = tabz.folder(element); // ref to <section> containing `element`
+```
+
+Overload: All of the above can alternatively take a string, a selector for a specific panel, tab, or folder, respectively. The advantage of using these functions rather than simply `document.querySelector()` is: (a) search domain is restricted to `options.root` if given on instantiation); and (b) result is guaranteed to be the expected type of element (otherwise `null` is returned). 
 
 ###### Callbacks
 
@@ -130,6 +140,14 @@ var tabz = new Tabz( options )
 `options.referenceElement` - Explicitly position `<style>` element before this element. Default position is in `<head>`, before the first `<link rel="stylesheet">` or `<style>` element, if any; otherwise at the end of `<head>`.
 
 `defaultTabSelector` - A .classname or #id of the tab(s) to select by default. This string is appended to `.tabz > header` to ensure only one of our tabs is selected. Defaults to `'.default-tab'`.
+
+`onEnable` - Callback implementation.
+
+`onDisable` - Callback implementation.
+
+`onEnabled` - Callback implementation.
+
+`onDisabled` - Callback implementation.
 
 ### Events
 

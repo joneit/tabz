@@ -13,6 +13,10 @@ var cssInjector = require('css-injector');
  * @param {boolean} [options.unhook=false] - Remove event listener from tab panels (`.tabz` elements).
  * @param {Element} [options.referenceElement] - Passed to cssInjector's insertBefore() call.
  * @param {string} [options.defaultTabSelector='.default-tab'] - .classname or #id of the tab to select by default
+ * @param {object} [options.onEnable] - Handler implementation. See {@link Tabz#onEnable|onEnable}.
+ * @param {object} [options.onDisable] - Handler implementation. See {@link Tabz#onDisable|onEnable}.
+ * @param {object} [options.onEnabled] - Handler implementation. See {@link Tabz#onEnabled|onEnable}.
+ * @param {object} [options.onDisabled] - Handler implementation. See {@link Tabz#onDisabled|onEnable}.
  * @constructor
  */
 function Tabz(options) {
@@ -40,6 +44,12 @@ function Tabz(options) {
             }
         }
         cssInjector(css, 'tabz-css-base', referenceElement);
+
+        for (var key in options) {
+            if (this[key] === noop) {
+                this[key] = options[key];
+            }
+        }
 
         /**
          * @summary The context of this tab object.
@@ -99,46 +109,70 @@ Tabz.prototype.tabTo = function(el) {
  * @param {HTMLElement|number} el - An element that is (or is within) the tab panel (`.tabz` element) to look in.
  * @returns {undefined|HTMLElement} Returns tab (`<header>`) element.  Returns `undefined` if `el` is neither of the above or an out of range index.
  */
-Tabz.prototype.enabled = function(el) {
-    while (el && !el.classList.contains('tabz')) {
-        el = el.parentElement;
-    }
+Tabz.prototype.enabledTab = function(el) {
+    el = this.panel(el);
     return el && el.querySelector(':scope>header.tabz-enable');
 };
 
 /**
- * Get tab element if given folder element; or find tab.
- * @param {string|HTMLElement} [el] - May be one of:
- * * `HTMLElement`
- *   * `<header>` - tab element
- *   * `<section>` - folder element
- * * `string` - CSS selector to one of the above
- * @returns {null|HTMLElement} tab (`<header>...</header>`) element or `null` if `el` is not found or not one of the above
+ * @summary Get tab element.
+ * @desc Get tab element if given tab or folder element; or an element within such; or find tab.
+ * @param {string|Element} [el] - May be one of:
+ * * a tab (a `<header>` element)
+ * * a folder (a `<section>` element)
+ * * an element within one of the above
+ * * `string` - CSS selector to one of the above, searching within the root or document
+ * @returns {null|Element} tab (`<header>...</header>`) element or `null` if not found
  * @memberOf Tabz.prototype
  */
 Tabz.prototype.tab = function(el) {
-    if (!(el instanceof Element)) {
-        el = this.root.querySelector(el);
-    }
+    el = lookForEl.call(this, el);
     return !(el instanceof HTMLElement) ? null : el.tagName === 'HEADER' ? el : el.tagName === 'SECTION' ? el.previousElementSibling : null;
 };
 
 /**
- * Get folder element if given tab element; or find folder.
- * @param {string|HTMLElement} [el] - May be one of:
- * * `HTMLElement`
- *   * `<header>` - tab element
- *   * `<section>` - folder element
- * * `string` - CSS selector to one of the above
- * @returns {null|HTMLElement} tab (`<header>...</header>`) element or `null` if `el` is not found or not one of the above
+ * @summary Get folder element.
+ * @desc Get folder element if given tab or folder element; or an element within such; or find folder.
+ * @param {string|Element} [el] - May be one of:
+ * * a tab (a `<header>` element)
+ * * a folder (a `<section>` element)
+ * * an element within one of the above
+ * * `string` - CSS selector to one of the above, searching within the root or document
+ * @returns {null|Element} tab (`<header>...</header>`) element or `null` if not found
  * @memberOf Tabz.prototype
  */
 Tabz.prototype.folder = function(el) {
-    if (!(el instanceof Element)) {
-        el = this.root.querySelector(el);
-    }
+    el = lookForEl.call(this, el);
     return !(el instanceof HTMLElement) ? null : el.tagName === 'SECTION' ? el : el.tagName === 'HEADER' ? el.nextElementSibling : null;
 };
+
+/**
+ * @summary Get tab panel element.
+ * @desc Get panel element if given tab panel element; or an element within a tab panel; or find tab panel.
+ * @param {string|Element} [el] - May be one of:
+ * * a tab panel (an `HTMLElement` with class `tabz`)
+ * * an element within a tab panel
+ * * `string` - CSS selector to one a tab panel, searching within the root or document
+ * @returns {null|Element} tab panel element or `null` if not found
+ * @memberOf Tabz.prototype
+ */
+Tabz.prototype.panel = function(el) {
+    while (el && !el.classList.contains('tabz')) {
+        el = el.parentElement;
+    }
+    return !(el instanceof HTMLElement) ? null : el.classList.contains('tabz') ? el : null;
+};
+
+function lookForEl(el) {
+    if (el instanceof Element) {
+        while (el && el.tagName !== 'HEADER' && el.tagName !== 'SECTION') {
+            el = el.parentElement;
+        }
+    } else {
+        el = this.root.querySelector(el);
+    }
+    return el;
+}
 
 /** Enables the tab/folder pair of the clicked tab.
  * Disables all the other pairs in this scope which will include the previously enabled pair.
@@ -158,7 +192,7 @@ function click(div, target) {
     }, div);
 
     if (newTab) {
-        oldTab = this.enabled(div);
+        oldTab = this.enabledTab(div);
         toggleTab.call(this, oldTab, false);
         toggleTab.call(this, newTab, true);
     }
@@ -202,24 +236,32 @@ function toggleTab(tab, enable) {
 /**
  * Called before a previously disabled tab is enabled.
  * @type {tabEvent}
+ * @abstract
+ * @memberOf Tabz.prototype
  */
 Tabz.prototype.onEnable = noop;
 
 /**
  * Called before a previously enabled tab is disabled by another tab being enabled.
  * @type {tabEvent}
+ * @abstract
+ * @memberOf Tabz.prototype
  */
 Tabz.prototype.onDisable = noop;
 
 /**
  * Called after a previously disabled tab is enabled.
  * @type {tabEvent}
+ * @abstract
+ * @memberOf Tabz.prototype
  */
 Tabz.prototype.onEnabled = noop;
 
 /**
  * Called after a previously enabled tab is disabled by another tab being enabled.
  * @type {tabEvent}
+ * @abstract
+ * @memberOf Tabz.prototype
  */
 Tabz.prototype.onDisabled = noop;
 
