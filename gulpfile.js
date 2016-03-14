@@ -11,7 +11,7 @@ var runSequence = require('run-sequence'),
     pipe        = require('multipipe');
 
 var name     = 'tabz',
-    global   = 'Tabz',
+    main     = 'Tabz',
     srcDir   = './src/',
     testDir  = './test/',
     buildDir = './build/';
@@ -92,7 +92,7 @@ function browserify() {
     return gulp.src(srcDir + 'index.js')
         .pipe($$.replace(
             'module.exports =',
-            'window.' + global + ' ='
+            'window.' + main + ' ='
         ))
         .pipe(
             $$.mirror(

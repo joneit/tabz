@@ -1,5 +1,6 @@
 .tabz {
     position: relative;
+    visibility: hidden; /* for Chrome v40 hack */
     height: 100%;
 }
 .tabz > header {
@@ -21,14 +22,14 @@
     position: absolute;
     display: none;
     background-color: white;
-    margin-top: -1px;
+    margin-top: -1px; /* reset by initialization code */
     padding: 8px;
     border: 1px solid #666;
     border-radius: 6px;
     left: 0;
     right: 0;
     bottom: 0;
-    top: 0; /* reset by initialization code */
+    top: 0;
     z-index: 0;
 }
 
