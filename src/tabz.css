@@ -1,11 +1,12 @@
 .tabz {
     position: relative;
+    height: 100%;
 }
-.tabz> header {
+.tabz > header {
     position: relative;
     display: inline-block;
     background-color: white;
-    margin-left: 1.5em;
+    margin-left: 1em;
     padding: 5px .6em;
     border: 1px solid #666;
     border-bottom-color: transparent;
@@ -24,8 +25,10 @@
     padding: 8px;
     border: 1px solid #666;
     border-radius: 6px;
-    width: 85%;
-    height: 85%;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0; /* reset by initialization code */
     z-index: 0;
 }
 

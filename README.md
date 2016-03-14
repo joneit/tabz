@@ -12,7 +12,7 @@ A demo can be found [here](http://joneit.github.io/tabz/demo.html).
 A 2-tab tab panel with the first tab enabled:
 
 ```html
-<div class="tabz">
+<div class="tabz" style="width: 300px; height: 500px;">
 
     <header>Tab A</header>
     <section>Content A</section>
@@ -28,7 +28,7 @@ A 2-tab tab panel with the first tab enabled:
 A 2-tab tab panel nested within the 2nd tab of another 2-tab tab panel.
 
 ```html
-<div class="tabz">
+<div class="tabz" style="width: 300px; height: 500px;">
 
     <header>Tab A</header>
     <section>Content A</section>
@@ -48,6 +48,8 @@ A 2-tab tab panel nested within the 2nd tab of another 2-tab tab panel.
     </section>
 </div>
 ```
+
+The outer-most tab panel needs to be sized. This is not necessary for inner tab panel.
 
 The following, called after page load, will instantiate an single object to service all the `.tabz` panels above.
 
@@ -73,28 +75,42 @@ tabz.tabTo('#click-me');
 To find out which tab in a panel is the currently selected tab, call the following with the panel element (or any element within it):
 
 ```javascript
-var enabledTab = tabz.enabled(element); // returns the tab (`<header>`) element
+// returns the tab (`<header>`) element
+var enabledTab = tabz.enabled(element);
 ```
 
 ###### Easily find tab panels, tabs, and folders
 
 ```javascript
-var nearestPanelElement = tabz.panel(element); // ref to element with class 'tabz' containing `element`
-var nearestTabElement = tabz.tab(element); // ref to <header> containing `element`
-var nearestFolderElement = tabz.folder(element); // ref to <section> containing `element`
+// ref to element with class 'tabz' containing `element`
+var nearestPanelElement = tabz.panel(element);
+
+// ref to <header> containing `element`
+var nearestTabElement = tabz.tab(element);
+
+// ref to <section> containing `element`
+var nearestFolderElement = tabz.folder(element);
 ```
 
-Overload: All of the above can alternatively take a string, a selector for a specific panel, tab, or folder, respectively. The advantage of using these functions rather than simply `document.querySelector()` is: (a) search domain is restricted to `options.root` if given on instantiation); and (b) result is guaranteed to be the expected type of element (otherwise `null` is returned). 
+Overload: All of the above can alternatively take a string, a selector for a specific panel, tab, or folder, respectively. The advantage of using these functions rather than simply `document.querySelector()` is: (a) search domain is restricted to `options.root` (if given on instantiation); and (b) result is guaranteed to be the expected type of element (otherwise `null` is returned). 
 
 ###### Callbacks
 
 There are callbacks for each of the following events:
 
 ```javascript
-`tabz.onDisable = function(tab, folder) { ... }` // called before a previously enabled tab is disabled
-`tabz.onEnable = function(tab, folder) { ... }` // called before a previously disabled tab is enabled
-`tabz.onDisabled = function(tab, folder) { ... }` // called after a previously enabled tab is disabled
-`tabz.onEnabled = function(tab, folder) { ... }` // called after a previously disabled tab is enabled
+// called before a previously enabled tab is disabled
+tabz.onDisable = function(tab, folder) { ... }
+
+// called before a previously disabled tab is enabled
+tabz.onEnable = function(tab, folder) { ... }
+
+// called after a previously enabled tab is disabled
+tabz.onDisabled = function(tab, folder) { ... }
+
+// called after a previously disabled tab is enabled
+tabz.onEnabled = function(tab, folder) { ... }
+```
 
 The calling context for each of these (the `.this` value) is `tabz`.
 

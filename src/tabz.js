@@ -66,10 +66,15 @@ function Tabz(options) {
         // enable default tab and all its parents (must be a tab)
         this.tabTo(root.querySelector('.tabz > header' + defaultTabSelector));
 
-        // Bug in older versions of Chrome (like v40) which was an implied break at mark-up location of an absolute positioned block. The work-around is to hide those blocks until after first render; then show them. I don't know why this works but it does. Seems to be durable.
         setTimeout(function() {
             forEachEl('.tabz > section', function(el) {
+
+                // Step 1: A bug in older versions of Chrome (like v40) that inserted a break at mark-up location of an absolute positioned block. The work-around is to hide those blocks until after first render; then show them. I don't know why this works but it does. Seems to be durable.
                 el.style.display = 'block';
+
+                // Step 2: Adjust absolute top of each rendered folder to the bottom of its tab
+                el.style.top = el.previousElementSibling.getBoundingClientRect().bottom - el.parentElement.getBoundingClientRect().top + 'px';
+
             }, root);
         }, 0);
     }
