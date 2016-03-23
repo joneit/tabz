@@ -8,7 +8,7 @@
 var cssInjector = require('css-injector');
 
 /**
- * Register/deregister click handler on all tab collections.
+ * Register/de-register click handler on all tab collections.
  * @param {Element} [options.root=document] - Where to look for tab panels (`.tabz` elements) containing tabs and folders.
  * @param {boolean} [options.unhook=false] - Remove event listener from tab panels (`.tabz` elements).
  * @param {Element} [options.referenceElement] - Passed to cssInjector's insertBefore() call.
@@ -179,16 +179,17 @@ function lookForEl(el) {
     return el;
 }
 
-/** Enables the tab/folder pair of the clicked tab.
- * Disables all the other pairs in this scope which will include the previously enabled pair.
+/** @summary Switch to the clicked tab.
+ * Disable the previously enabled pair and, if sucessful, enable the new tab.
+ *
+ * If the disable is fails (`onDisable` returns truthy), no visible UI change occurs. This would be the typical failure. However, if the disable is successful but the enable fails (`onEnable` returns truthy), the panel will be left in an undefined state with no tabs enabled. (This is it's "natural" state with all objects depth-sorted with last folder on top but all tabs behind.) In this case, returns `null`  in which casae you should enable some tab.
  * @private
  * @this Tabz
  * @param {Element} div - The tab panel (`.tabz` element) that's handling the click event.
  * @param {Element} target - The element that received the click.
- * @returns {undefined|Element} The `<header>` element (tab) the was clicked; or `undefined` when click was not within a tab.
  */
 function click(div, target) {
-    var newTab, oldTab;
+    var newTab, oldTab, oldTabError;
 
     forEachEl(':scope>header:not(.tabz-enable)', function(tab) { // todo: use a .find() polyfill here
         if (tab.contains(target)) {
@@ -198,14 +199,18 @@ function click(div, target) {
 
     if (newTab) {
         oldTab = this.enabledTab(div);
-        toggleTab.call(this, oldTab, false);
-        toggleTab.call(this, newTab, true);
+        if (!oldTab || !toggleTab.call(this, oldTab, false)) {
+            toggleTab.call(this, newTab, true);
+        }
     }
-
-    return newTab;
 }
 
 /**
+ * @summary Enable or disable a tab.
+ * @desc Three steps:
+ * # Issues the onEnable or onDisable event; aborts on truthy return, returning that value.
+ * # Toggles the tab.
+ * # Issues the onEnabled or onDisabled event.
  * @private
  * @this Tabz
  * @param {Element} tab - The `<header>` element of the tab to enable or disable.
@@ -214,15 +219,19 @@ function click(div, target) {
 function toggleTab(tab, enable) {
     if (tab) {
         var folder = this.folder(tab),
-            method = enable ? 'onEnable' : 'onDisable';
+            panel = this.panel(tab),
+            method = enable ? 'onEnable' : 'onDisable',
+            error = this[method].call(this, tab, folder, panel);
 
-        this[method].call(this, tab, folder);
+        if (!error) {
+            tab.classList.toggle('tabz-enable', enable);
+            folder.classList.toggle('tabz-enable', enable);
 
-        tab.classList.toggle('tabz-enable', enable);
-        folder.classList.toggle('tabz-enable', enable);
+            method += 'd';
+            this[method].call(this, tab, folder, panel);
+        }
 
-        method += 'd';
-        this[method].call(this, tab, folder);
+        return error;
     }
 }
 
